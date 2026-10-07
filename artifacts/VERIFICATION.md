@@ -1,5 +1,15 @@
 # 验证记录
 
+## GitHub Actions 1.1.3 首次公开发行
+
+验证日期：2026-10-07。公开仓库：[chxcodepro/WiFi-Cloak](https://github.com/chxcodepro/WiFi-Cloak)。[Actions 运行 37612544367](https://github.com/chxcodepro/WiFi-Cloak/actions/runs/37612544367) 已全部成功，构建现有注解标签 `v1.1.3` 的源码并发布 [WiFi Cloak 1.1.3](https://github.com/chxcodepro/WiFi-Cloak/releases/tag/v1.1.3)。
+
+下载并解析 Actions 报告：26 项测试通过，0 失败、0 错误；Lint 无错误或严重错误。签名证书与旧版一致的流水线校验通过。Release 已公开，非草稿、非预发行，包含 APK 和 SHA-256 校验文件；下载校验文件中的摘要与 GitHub 记录的 APK 资产摘要一致。
+
+CI APK SHA-256：`a7e0a7a657c2d9ebed7de00dd37e2c90d7c45298d21e4cbf2567b38343b2503f`。此摘要对应公开下载包；下方历史记录的摘要对应本机构建包。
+
+首次 SDK 准备运行因 setup-android 默认安装已移除的旧 `tools` 包失败。最新工作流明确安装 `platform-tools`，手动输入既有标签并强制检出标签源码后完成发布，原注解标签没有移动。真机覆盖安装与 LSPosed 注入仍沿用下方的验收边界。
+
 ## 1.1.3 覆盖安装后的 WiFi 配置保留
 
 验证日期：2026-10-07，versionCode 5。
