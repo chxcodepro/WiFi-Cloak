@@ -18,6 +18,6 @@ Status: implemented
 
 ## Consequences
 
-后续版本在更新 Gradle 版本与 CHANGELOG 后推送对应的版本标签即可发布。维护者必须保留现有密钥与 Secrets；密钥缺失时流水线明确失败。当前证书沿用本机开发签名，保持旧版覆盖安装兼容性。源码公开并不包括密钥、SDK 本机路径、缓存或构建产物。重跑同一标签更新对应 Release 资产与校验文件，不移动已发布的标签。
+后续版本在更新 Gradle 版本与 CHANGELOG 后推送对应的版本标签即可发布。手动触发使用最新 main 工作流及明确的 tag 输入，强制检出标签源码；SDK 安装等工具流程修复不要求移动原标签。Android SDK 安装明确选择 platform-tools，避免 setup-android 默认安装已经移除的旧 tools 包。维护者必须保留现有密钥与 Secrets；密钥缺失时流水线明确失败。当前证书沿用本机开发签名，保持旧版覆盖安装兼容性。源码公开并不包括密钥、SDK 本机路径、缓存或构建产物。重跑同一标签更新对应 Release 资产与校验文件，不移动已发布的标签。
 
 历史笔记检索未发现既有 `.agents/notes/`，此记录没有重叠项。流水线首次远程执行结果在 GitHub Actions 中核对；APK 的真实设备安装与 LSPosed 注入验收仍保留此前的验证边界。

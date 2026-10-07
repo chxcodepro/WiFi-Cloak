@@ -5,12 +5,17 @@ on:
     tags:
       - 'v*'
   workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing version tag to build and publish
+        required: true
+        type: string
 
 permissions:
   contents: read
 
 concurrency:
-  group: release-${{ github.ref }}
+  group: release-${{ inputs.tag || github.ref_name }}
   cancel-in-progress: false
 
 jobs:
@@ -20,19 +25,22 @@ jobs:
     permissions:
       contents: write
     env:
-      RELEASE_TAG: ${{ github.ref_name }}
+      RELEASE_TAG: ${{ inputs.tag || github.ref_name }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: refs/tags/${{ inputs.tag || github.ref_name }}
       - name: Validate release tag and notes
         shell: bash
         run: |
-          test "$GITHUB_REF_TYPE" = tag || { echo 'Run this workflow on a version tag.'; exit 1; }
           python scripts/prepare_release.py "$RELEASE_TAG" --check
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: '21'
       - uses: android-actions/setup-android@v3
+        with:
+          packages: platform-tools
       - name: Install Android SDK
         run: sdkmanager 'platforms;android-36' 'build-tools;35.0.0'
       - uses: gradle/actions/setup-gradle@v4
@@ -71,7 +79,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: reports-${{ github.ref_name }}
+          name: reports-${{ inputs.tag || github.ref_name }}
           path: |
             app/build/reports/tests/
             app/build/test-results/
@@ -81,7 +89,7 @@ jobs:
       - name: Upload release artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: WiFiCloak-${{ github.ref_name }}
+          name: WiFiCloak-${{ inputs.tag || github.ref_name }}
           path: dist/
           if-no-files-found: error
       - name: Publish GitHub Release

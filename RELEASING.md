@@ -38,7 +38,7 @@ git push origin vX.Y.Z
 若发生临时构建或上传故障，在 Actions 中重跑失败任务；也可通过 CLI 对已存在的标签运行：
 
 ```bash
-gh workflow run release.yml --ref vX.Y.Z
+gh workflow run release.yml --ref main -f tag=vX.Y.Z
 ```
 
-手动运行必须选择版本标签，不能选择 `main`。重跑同一标签可以补齐或更新对应 Release 的资产及校验文件。已发布标签不应移动；源码修改应增加新版本并推送新标签。
+手动运行使用 `main` 上的最新工作流，在 `tag` 输入中指定已存在的版本标签；工作流强制检出该标签的源码并验证版本。这样可以修复 SDK 安装等发布工具问题后构建原标签，无需移动已发布的标签。重跑同一标签可以补齐或更新对应 Release 的资产及校验文件。运行时源码修改应增加新版本并推送新标签。
