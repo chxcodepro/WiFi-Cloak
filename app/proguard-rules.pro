@@ -1,0 +1,3 @@
+-keep class dev.wificloak.hook.WifiModule { *; }
+-keep class io.github.libxposed.service.** { *; }
+-keep,allowoptimization,allowobfuscation class * extends io.github.libxposed.api.XposedModule

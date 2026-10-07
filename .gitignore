@@ -1,0 +1,15 @@
+.gradle/
+.kotlin/
+local.properties
+**/build/
+.codegraph/
+.impeccable/
+.oce-client/
+artifacts/tmp/
+artifacts/*.apk
+artifacts/checksums.sha256
+dist/
+.env
+.env.*
+*.jks
+*.keystore
