@@ -23,4 +23,17 @@ object WifiSelections {
             profiles = config.profiles.map { if (it.id == id) it.copy(offline = true, lastUsedAt = now, uses = it.uses + 1) else it },
             rules = config.rules.map { it.copy(profileId = id) })
     }
+
+    fun manualErrors(ssid: String, bssid: String, mac: String): Map<String, String> =
+        ProfileValidator.errors(WifiProfile(id = "manual", name = ssid, ssid = ssid,
+            bssid = bssid.trim(), mac = mac.trim(), createdAt = 0))
+
+    fun saveManual(config: CloakConfig, ssid: String, bssid: String, mac: String,
+        now: Long = System.currentTimeMillis()): CloakConfig {
+        val address = bssid.trim().lowercase()
+        val deviceMac = mac.trim().lowercase()
+        require(manualErrors(ssid, address, deviceMac).isEmpty()) { "请检查 SSID、BSSID 和 MAC" }
+        val existing = config.profiles.find { it.ssid == ssid && it.bssid.equals(address, true) }
+        return saveAndUse(config, ScannedWifi(ssid, address, existing?.frequency ?: 5180, existing?.rssi ?: -48), deviceMac, now)
+    }
 }

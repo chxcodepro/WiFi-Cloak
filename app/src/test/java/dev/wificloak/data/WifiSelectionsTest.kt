@@ -70,4 +70,38 @@ class WifiSelectionsTest {
         assertNull(MacAddresses.firstValid("ff:ff:ff:ff:ff:ff"))
         assertNull(MacAddresses.firstValid("aa:bb:cc:dd:ee:ff:12:34"))
     }
+
+    @Test fun manualIdentityPersistsExactlyAndNormalizesOnlyAddresses() {
+        val saved = WifiSelections.saveManual(CloakConfig(), " Office WiFi ", " 3C:84:6A:12:7B:90 ", " A2:6C:84:19:2E:70 ", now = 1000)
+        val restored = CloakConfig.decode(saved.encode())
+        assertEquals(saved, restored)
+        assertEquals(" Office WiFi ", restored.activeProfile!!.ssid)
+        assertEquals(wifi.bssid, restored.activeProfile!!.bssid)
+        assertEquals(mac, restored.activeProfile!!.mac)
+        assertTrue(restored.activeProfile!!.offline)
+    }
+
+    @Test fun manualUpdateReusesBackupAndRetainsScanMetadataWhileMovingRules() {
+        val scanned = WifiSelections.saveAndUse(CloakConfig(), wifi.copy(frequency = 2412, rssi = -65), mac, now = 1000)
+        val previous = scanned.copy(rules = listOf(AppRule("test.app", scanned.activeProfileId!!)))
+        val updated = WifiSelections.saveManual(previous, wifi.ssid, wifi.bssid.uppercase(), "b2:6c:84:19:2e:70", now = 2000)
+        assertEquals(1, updated.profiles.size)
+        assertEquals(previous.activeProfileId, updated.activeProfileId)
+        assertEquals(1000L, updated.activeProfile!!.createdAt)
+        assertEquals(2412, updated.activeProfile!!.frequency)
+        assertEquals(-65, updated.activeProfile!!.rssi)
+        assertEquals(2, updated.activeProfile!!.uses)
+        assertEquals("b2:6c:84:19:2e:70", updated.profileFor("test.app")!!.mac)
+    }
+
+    @Test fun invalidManualInputCannotReplaceTheCurrentWifi() {
+        val previous = WifiSelections.saveAndUse(CloakConfig(), wifi, mac, now = 1000)
+        listOf(Triple("中".repeat(11), wifi.bssid, mac), Triple("", wifi.bssid, mac),
+            Triple(wifi.ssid, "ff:ff:ff:ff:ff:ff", mac), Triple(wifi.ssid, wifi.bssid, "02:00:00:00:00:00")).forEach { (ssid, bssid, deviceMac) ->
+            assertFalse(WifiSelections.manualErrors(ssid, bssid, deviceMac).isEmpty())
+            assertThrows(IllegalArgumentException::class.java) { WifiSelections.saveManual(previous, ssid, bssid, deviceMac) }
+        }
+        assertEquals(mac, previous.activeProfile!!.mac)
+        assertEquals(1, previous.profiles.size)
+    }
 }

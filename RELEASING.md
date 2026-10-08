@@ -31,7 +31,7 @@ git tag -a vX.Y.Z -m "Release vX.Y.Z"
 git push origin vX.Y.Z
 ```
 
-`.github/workflows/release.yml` 自动安装 JDK 21、Android SDK 36 与 Build Tools 35.0.0，执行 26 项现有单元测试、Lint 和 Release 构建。任何测试、静态检查、版本或签名校验失败都会阻止发布。真实设备验收范围见 `artifacts/VERIFICATION.md`。
+`.github/workflows/release.yml` 自动安装 JDK 21、Android SDK 36 与 Build Tools 35.0.0，执行现有单元测试、Lint 和 Release 构建。任何测试、静态检查、版本或签名校验失败都会阻止发布。真实设备验收范围见 `artifacts/VERIFICATION.md`。
 
 成功后，GitHub Release 包含 `WiFiCloak-X.Y.Z.apk` 和本次构建生成的 `checksums.sha256`。Actions 同时保留构建资产和测试报告。源码仓库不提交历史本机 APK，也不使用本机历史校验文件作为 CI APK 的校验值。
 

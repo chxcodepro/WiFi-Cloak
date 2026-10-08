@@ -25,6 +25,8 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
 
+data class ManualSaveState(val saving: Boolean = false, val error: String? = null, val savedCount: Int = 0)
+
 class ManagerViewModel(application: Application) : AndroidViewModel(application) {
     val bridge = (application as CloakApplication).bridge
     private val store = ConfigStore(application)
@@ -38,6 +40,8 @@ class ManagerViewModel(application: Application) : AndroidViewModel(application)
     val scanned = MutableStateFlow<WifiScan?>(null)
     val scanning = MutableStateFlow(false)
     val selecting = MutableStateFlow<String?>(null)
+    private val mutableManualSave = MutableStateFlow(ManualSaveState())
+    val manualSave = mutableManualSave.asStateFlow()
     private val wifiCapture = WifiCapture(application)
     private val messages = Channel<String>(Channel.BUFFERED)
     val events = messages.receiveAsFlow()
@@ -90,6 +94,28 @@ class ManagerViewModel(application: Application) : AndroidViewModel(application)
 
     fun useProfile(id: String) = mutate("备用 WiFi 已选用") { WifiSelections.useSaved(it, id) }
 
+    fun clearManualSaveError() {
+        if (!mutableManualSave.value.saving) mutableManualSave.value = mutableManualSave.value.copy(error = null)
+    }
+
+    fun saveManualWifi(ssid: String, bssid: String, mac: String) {
+        if (mutableManualSave.value.saving) return
+        mutableManualSave.value = mutableManualSave.value.copy(saving = true, error = null)
+        viewModelScope.launch {
+            mutex.withLock {
+                runCatching {
+                    check(selecting.value == null) { "正在采集设备 MAC，请稍后再保存" }
+                    persist(WifiSelections.saveManual(mutableConfig.value, ssid, bssid, mac))
+                }.onSuccess {
+                    mutableManualSave.value = mutableManualSave.value.copy(saving = false, savedCount = mutableManualSave.value.savedCount + 1)
+                    messages.send(if (syncError.value != null) "WiFi 已保存并选用，等待框架同步" else "WiFi 已保存并选用，重启目标应用生效")
+                }.onFailure {
+                    mutableManualSave.value = mutableManualSave.value.copy(saving = false, error = it.message ?: "保存失败，请重试")
+                }
+            }
+        }
+    }
+
     fun deleteProfile(id: String) = mutate("配置已删除") { previous ->
         check(previous.activeProfileId != id && previous.rules.none { it.profileId == id }) { "先选择其他 WiFi，再移除此备用项" }
         val remaining = previous.profiles.filterNot { it.id == id }
@@ -100,7 +126,7 @@ class ManagerViewModel(application: Application) : AndroidViewModel(application)
 
     fun toggleApp(packageName: String, enable: Boolean) {
         if (packageName in pending.value) return
-        if (enable && mutableConfig.value.activeProfile == null) { notify("先扫描并选择 WiFi，或选用备用 WiFi"); return }
+        if (enable && mutableConfig.value.activeProfile == null) { notify("先扫描或手动添加 WiFi，也可选用备用 WiFi"); return }
         if (!bridge.state.value.connected) { notify("先在 LSPosed 启用模块并重新打开"); return }
         pending.value += packageName
         viewModelScope.launch {

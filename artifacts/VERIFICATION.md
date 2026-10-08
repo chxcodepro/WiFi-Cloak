@@ -1,5 +1,17 @@
 # 验证记录
 
+## 1.2.0 手动添加 WiFi 身份
+
+版本：1.2.0，versionCode 6。WiFi 页增加手动表单，输入 SSID、BSSID 和设备 MAC 后“保存并使用”，保存为备用身份并统一切换受控应用。无需扫描、定位权限或 Root；格式校验与原子配置存储复用既有实现。相同 SSID/BSSID 更新设备 MAC，保留原 ID、历史和扫描元数据。
+
+- `:app:testDebugUnitTest`：29 项通过，0 失败、0 错误。新增三项覆盖手动持久化回读、地址大小写和空白归一化、重复项更新、规则同步及无效输入拒绝。
+- `:app:assembleRelease`：成功。`apksigner` 校验证书与既有版本一致。
+- `:app:lintDebug`：零错误及严重错误。
+- `:app:assembleDebugAndroidTest`：手动表单验证与保存状态恢复测试编译成功；当前无已连接 Android 设备，因此未执行仪器测试。
+- 独立源码审查发现保存期间旋转屏幕的旧界面回调问题；已改为 ViewModel StateFlow 持有保存状态、错误和成功计数，重建后的界面按成功计数关闭表单并切换备用页。审查确认该问题已解决。表单补充 safe drawing/IME 避让与可滚动正文。
+
+真实键盘弹出、1.3 倍字体、窄屏、TalkBack 和 LSPosed 注入仍需真机验收。本次没有生成模拟截图，也不把源码审查或编译作为视觉验收。
+
 ## GitHub Actions 1.1.3 首次公开发行
 
 验证日期：2026-10-07。公开仓库：[chxcodepro/WiFi-Cloak](https://github.com/chxcodepro/WiFi-Cloak)。[Actions 运行 37612544367](https://github.com/chxcodepro/WiFi-Cloak/actions/runs/37612544367) 已全部成功，构建现有注解标签 `v1.1.3` 的源码并发布 [WiFi Cloak 1.1.3](https://github.com/chxcodepro/WiFi-Cloak/releases/tag/v1.1.3)。

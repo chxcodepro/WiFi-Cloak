@@ -56,6 +56,7 @@ fun CloakApp(manager: ManagerViewModel) {
     val scanned by manager.scanned.collectAsStateWithLifecycle()
     val scanning by manager.scanning.collectAsStateWithLifecycle()
     val selecting by manager.selecting.collectAsStateWithLifecycle()
+    val manualSave by manager.manualSave.collectAsStateWithLifecycle()
     val snackbar = remember { SnackbarHostState() }
     var destination by rememberSaveable { mutableIntStateOf(0) }
     val launcher = rememberLauncherForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { granted ->
@@ -106,7 +107,8 @@ fun CloakApp(manager: ManagerViewModel) {
                             0 -> ProfilesScreen(config, framework, syncError, scanned, scanning, selecting,
                                 onScan = ::scan, onUseScanned = manager::useScannedWifi,
                                 onUseSaved = { manager.useProfile(it.id) }, onDelete = { manager.deleteProfile(it.id) },
-                                onSettings = { destination = 2 })
+                                onSettings = { destination = 2 }, manualSave = manualSave,
+                                onSaveManual = manager::saveManualWifi, onClearManualError = manager::clearManualSaveError)
                             1 -> AppsScreen(config, framework, apps, pending, loading,
                                 onToggle = manager::toggleApp, onRefresh = { manager.reloadApps(); manager.refresh() },
                                 onConfigure = { destination = 0 }, onSettings = { destination = 2 })

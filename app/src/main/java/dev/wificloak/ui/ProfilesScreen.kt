@@ -28,6 +28,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Tab
@@ -36,6 +37,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -50,6 +52,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import dev.wificloak.data.CloakConfig
+import dev.wificloak.ManualSaveState
 import dev.wificloak.data.ScannedWifi
 import dev.wificloak.data.WifiProfile
 import dev.wificloak.data.WifiScan
@@ -62,10 +65,16 @@ import java.util.Date
 fun ProfilesScreen(
     config: CloakConfig, framework: FrameworkState, syncError: String?, scan: WifiScan?, scanning: Boolean, selecting: String?,
     onScan: () -> Unit, onUseScanned: (ScannedWifi) -> Unit, onUseSaved: (WifiProfile) -> Unit,
-    onDelete: (WifiProfile) -> Unit, onSettings: () -> Unit
+    onDelete: (WifiProfile) -> Unit, onSettings: () -> Unit,
+    manualSave: ManualSaveState, onSaveManual: (String, String, String) -> Unit, onClearManualError: () -> Unit
 ) {
     var tab by rememberSaveable { mutableIntStateOf(0) }
     var deleting by remember { mutableStateOf<WifiProfile?>(null) }
+    var adding by rememberSaveable { mutableStateOf(false) }
+    var manualStartCount by rememberSaveable { mutableIntStateOf(0) }
+    LaunchedEffect(manualSave.savedCount) {
+        if (adding && manualSave.savedCount > manualStartCount) { adding = false; tab = 1 }
+    }
     val current = config.activeProfile
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         TopAppBar(title = { Text("WiFi", fontWeight = FontWeight.SemiBold) })
@@ -97,6 +106,13 @@ fun ProfilesScreen(
                     if (scanning) CircularProgressIndicator(Modifier.size(20.dp), color = MaterialTheme.colorScheme.onPrimary, strokeWidth = 2.dp)
                     else Icon(Icons.Outlined.WifiFind, null, Modifier.size(20.dp))
                     Text(if (scanning) "扫描中" else "扫描 WiFi", Modifier.padding(start = 10.dp))
+                }
+            }
+            item {
+                OutlinedButton(onClick = { manualStartCount = manualSave.savedCount; onClearManualError(); adding = true },
+                    enabled = selecting == null && !manualSave.saving,
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp).height(48.dp)) {
+                    Text("手动添加")
                 }
             }
             if (selecting != null) item {
@@ -139,6 +155,8 @@ fun ProfilesScreen(
             item { Spacer(Modifier.height(24.dp)) }
         }
     }
+    if (adding) ManualWifiDialog(saving = manualSave.saving, saveError = manualSave.error,
+        onDismiss = { adding = false }, onSave = onSaveManual, onInputChanged = onClearManualError)
     deleting?.let { profile ->
         val referenced = config.activeProfileId == profile.id || config.rules.any { it.profileId == profile.id }
         AlertDialog(onDismissRequest = { deleting = null }, title = { Text(if (referenced) "WiFi 正在使用" else "移除“${profile.ssid}”？") },
