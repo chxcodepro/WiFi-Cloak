@@ -2,6 +2,8 @@
 
 ## 1.2.0 手动添加 WiFi 身份
 
+GitHub Actions [运行 37745263089](https://github.com/chxcodepro/WiFi-Cloak/actions/runs/37745263089) 已全部成功，[v1.2.0 Release](https://github.com/chxcodepro/WiFi-Cloak/releases/tag/v1.2.0) 已公开。下载的 CI 报告确认 29 项测试通过，0 失败、0 错误，Lint 无错误/严重错误。APK 证书一致性校验通过；发布校验文件与 GitHub APK 资产摘要一致：`dd73585758800c2681c52d4e5ce647ba6dda8e394495cdc8afe8bfcdefd5577e`。
+
 版本：1.2.0，versionCode 6。WiFi 页增加手动表单，输入 SSID、BSSID 和设备 MAC 后“保存并使用”，保存为备用身份并统一切换受控应用。无需扫描、定位权限或 Root；格式校验与原子配置存储复用既有实现。相同 SSID/BSSID 更新设备 MAC，保留原 ID、历史和扫描元数据。
 
 - `:app:testDebugUnitTest`：29 项通过，0 失败、0 错误。新增三项覆盖手动持久化回读、地址大小写和空白归一化、重复项更新、规则同步及无效输入拒绝。

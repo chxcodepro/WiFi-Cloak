@@ -6,6 +6,8 @@ colors:
   dark-primary: "#A9D0B8"
   light-primary-container: "#D8E9DD"
   dark-primary-container: "#284D3B"
+  light-on-primary-container: "#153A2C"
+  dark-on-primary-container: "#D7EDDE"
   light-secondary: "#526557"
   dark-secondary: "#BBCBB8"
   light-background: "#F6F3EA"
@@ -89,7 +91,7 @@ components:
     textColor: "#FFFFFF"
     typography: "{typography.label-large}"
     padding: "16dp 24dp"
-    height: "48dp"
+    height: "52dp"
   button-tonal:
     backgroundColor: "{colors.light-primary-container}"
     textColor: "{colors.light-on-surface}"
@@ -110,7 +112,7 @@ components:
     height: "40dp"
   card-current-profile:
     backgroundColor: "{colors.light-primary-container}"
-    textColor: "{colors.light-on-surface}"
+    textColor: "{colors.light-on-primary-container}"
     rounded: "{rounded.content}"
     padding: "24dp"
   nav-item:
@@ -121,15 +123,15 @@ components:
     height: "80dp"
 ---
 
-# 松绿手帐 · WiFi Cloak 1.1.0
+# 松绿手帐 · WiFi Cloak
 
 ## 视觉与平台
 
-沿用用户确认的松绿、暖白 Material 3 视觉。Android 原生组件负责导航、选择、权限、状态与反馈；BSSID、MAC 使用系统等宽字体。浅色和深色角色来自 `ui/Theme.kt`。不增加装饰阴影、纹理或渐变。宽度 600dp 以下使用导航栏，以上使用导航轨；WiFi 工作区最大 720dp，设置最大 640dp。
+沿用用户确认的松绿、暖白 Material 3 视觉。Android 原生组件负责导航、选择、权限、状态与反馈；列表及当前身份中的 BSSID、MAC 使用系统等宽字体，手动表单使用 Material 正文输入字体。浅色和深色角色来自 `ui/Theme.kt`。不增加装饰阴影、纹理或渐变。宽度 600dp 以下使用导航栏，以上使用导航轨；WiFi 工作区最大 720dp，设置最大 640dp。
 
 ## 首页结构
 
-WiFi / 应用 / 设置三目的地。WiFi 页依次显示框架服务连接状态、已选 WiFi 身份、主操作“扫描 WiFi”、次要操作“手动添加”、附近与备用两个标签页。服务连接不推断模块启用或目标应用注入状态；设置页分别呈现框架服务与模块开关，后者显示“请在 LSPosed 查看”。当前身份使用 16dp 圆角、24dp 内边距、16dp 分组间距，SSID 使用 headlineSmall，BSSID/MAC 使用 bodyMedium。
+WiFi / 应用 / 设置三目的地。WiFi 页依次显示框架服务连接状态、已选 WiFi 身份、主操作“扫描 WiFi”、次要操作“手动添加”、附近与备用两个标签页。服务连接不推断模块启用或目标应用注入状态；设置页分别呈现框架服务与模块开关，后者显示“请在 LSPosed 查看”。当前身份使用 16dp 圆角、24dp 内边距、16dp 分组间距及 onPrimaryContainer 文字角色，SSID 使用 headlineSmall 并覆盖为 SemiBold，BSSID/MAC 使用 bodyMedium。
 
 附近列表显示 SSID、BSSID、频段、信号强度；备用列表显示 SSID、BSSID、最近使用日期与次数。整行通过原生 RadioButton 与 selectable 语义选择，行内间隔 12dp，数据间隔 6dp，外层左右间隔 24dp。备用行保留移除操作，当前或被引用项须先切换 WiFi。列表不使用嵌套卡片。
 
